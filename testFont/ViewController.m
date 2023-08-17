@@ -2,19 +2,17 @@
 //  ViewController.m
 //  testFont
 //
-//  Created by cherrydemo M on 2017/10/20.
-//  Copyright © 2017年 cherrydemo M. All rights reserved.
+//  Created by Meng on 8/17/23.
 //
 
 #import "ViewController.h"
+#import "ViewModel.h"
 
-@interface ViewController ()
-@property (weak, nonatomic) IBOutlet UITextView *egTextView;
-@property (weak, nonatomic) IBOutlet UILabel *familyNameLabel;
-@property (weak, nonatomic) IBOutlet UILabel *fontNameLabel;
+@interface ViewController () <UITableViewDelegate, UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITextView *textView;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
 
-@property (nonatomic) int familyNum;
-@property (nonatomic) int fontNum;
+@property (nonatomic, strong) ViewModel *viewModel;
 
 @end
 
@@ -22,56 +20,58 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    
-    self.familyNum = 0;
-    self.fontNum = 0;
-    
-    [self dealFamilyNumAndFontNum];
-    [self show];
+    // Do any additional setup after loading the view.
+    [self commitInit];
+    [self.tableView reloadData];
 }
 
-- (IBAction)nextFontClick:(UIButton *)sender {
-    self.fontNum++;
-    [self dealFamilyNumAndFontNum];
-    [self show];
+#pragma mark - UI
+- (void)commitInit {
+    self.textView.layer.borderColor = UIColor.grayColor.CGColor;
+    self.textView.layer.borderWidth = 1;
+    self.textView.layer.cornerRadius = 10;
+    self.textView.clipsToBounds = YES;
+        
+    [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:NSStringFromClass([UITableViewCell class])];
 }
 
-- (void)show{
-    NSArray *familyNames = [UIFont familyNames];
-    NSString *familyName = familyNames[self.familyNum];
-    NSArray *fontNames = [UIFont fontNamesForFamilyName:familyName];
-    NSString *fontName = fontNames[self.fontNum];
-    [self.egTextView setFont:[UIFont fontWithName:fontName size:23]];
-    [self.familyNameLabel setText:[NSString stringWithFormat:@"familyName:%@",familyName]];
-    [self.fontNameLabel setText:[NSString stringWithFormat:@"fontName:%@",fontName]];
-    
-    printf( "\tfamilyname:%s\tFont: %s \n", [familyName UTF8String],[fontName UTF8String] );
+- (IBAction)offTextView:(id)sender {
+    [self.textView resignFirstResponder];
 }
 
-- (void)dealFamilyNumAndFontNum{
-    NSArray *familyNames = [UIFont familyNames];
-    if (self.familyNum+1 > familyNames.count) {
-        self.familyNum = 0;
-        self.fontNum = 0;
-        [self dealFamilyNumAndFontNum];
-    } else {
-        NSArray *fontNames = [UIFont fontNamesForFamilyName:familyNames[self.familyNum]];
-        if (self.fontNum+1 > fontNames.count) {
-            self.familyNum++;
-            self.fontNum = 0;
-            [self dealFamilyNumAndFontNum];
-        }else{
-            return;
-        }
+#pragma mark - UITableViewDelegate, UITableViewDataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return  self.viewModel.sectionArray.count;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.viewModel.dataArray[section].count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([UITableViewCell class])];
+    NSString *fontName = self.viewModel.dataArray[indexPath.section][indexPath.row];
+    cell.textLabel.text = fontName;
+    cell.textLabel.font = [UIFont fontWithName:fontName size:18];
+    return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+    return self.viewModel.sectionArray[section];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [self offTextView:nil];
+    NSString *fontName = self.viewModel.dataArray[indexPath.section][indexPath.row];
+    self.textView.font = [UIFont fontWithName:fontName size:18];
+}
+
+#pragma mark - Set Get
+- (ViewModel *)viewModel {
+    if (!_viewModel) {
+        _viewModel = [[ViewModel alloc] init];
     }
+    return _viewModel;
 }
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 @end

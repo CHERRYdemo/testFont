@@ -2,15 +2,17 @@
 //  main.m
 //  testFont
 //
-//  Created by cherrydemo M on 2017/10/20.
-//  Copyright © 2017年 cherrydemo M. All rights reserved.
+//  Created by Meng on 8/17/23.
 //
 
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
 
 int main(int argc, char * argv[]) {
+    NSString * appDelegateClassName;
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+        // Setup code that might create autoreleased objects goes here.
+        appDelegateClassName = NSStringFromClass([AppDelegate class]);
     }
+    return UIApplicationMain(argc, argv, nil, appDelegateClassName);
 }
